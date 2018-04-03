@@ -17,7 +17,7 @@ header = {
     'Accept-Language': 'zh-CN,zh;q=0.8',
 }
 
-shodan_api_key = '4iZBuwpykciIi3bTonkLCbQ36MXSKV2c'
+shodan_api_key = ''
 api = shodan.Shodan(shodan_api_key)
 
 iplist = []
