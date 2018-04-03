@@ -1,0 +1,40 @@
+import grequests
+import requests,sys,re
+headers = {
+    'Connection': 'close',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, sdch, br',
+    'Accept-Language': 'zh-CN,zh;q=0.8',
+}
+good_url = []
+r = open('ss.txt','r')
+for urlit in r:
+    url = urlit.strip('\n')
+    targer = 'http://' + url
+    targer_secure = 'https://' + url
+    try:
+        rs = grequests.get(targer)
+    except:pass
+    if rs != None:
+        good_url.append(targer)
+        if rs == None:
+            try:
+                rsr = grequests.get(targer_secure)
+                good_url.append(targer_secure)
+            except:
+                pass
+    for urls in good_url:
+        html = requests.Session().get(url=urls,headers=headers,timeout=5)
+        comtext = html.text
+        status = html.status_code
+        title = re.search(r'<title>(.*?)</title>',comtext)
+        if title:
+            title = title.group(1).strip().strip('\r').strip('\n')[:30]
+        else:
+            title = 'None'
+        banner = 'Not Found'
+        try:
+            banner = html.headers['server'][:20]
+        except:pass
+        sys.stdout.write('%-26s %-26s %-26s %-26s\n' % (urls,status,title,banner))
