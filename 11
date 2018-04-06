@@ -1,5 +1,6 @@
-import grequests
 import requests,sys,re
+requests.packages.urllib3.disable_warnings()
+
 headers = {
     'Connection': 'close',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36',
@@ -7,34 +8,38 @@ headers = {
     'Accept-Encoding': 'gzip, deflate, sdch, br',
     'Accept-Language': 'zh-CN,zh;q=0.8',
 }
-good_url = []
-r = open('ss.txt','r')
-for urlit in r:
-    url = urlit.strip('\n')
-    targer = 'http://' + url
-    targer_secure = 'https://' + url
-    try:
-        rs = grequests.get(targer)
-    except:pass
-    if rs != None:
-        good_url.append(targer)
-        if rs == None:
-            try:
-                rsr = grequests.get(targer_secure)
-                good_url.append(targer_secure)
-            except:
-                pass
-    for urls in good_url:
-        html = requests.Session().get(url=urls,headers=headers,timeout=5)
-        comtext = html.text
+
+r1 = open('ss.txt','r')
+goodurl = []
+
+def Test_01():
+    for urls in r1:
+        url = urls.strip('\n')
+        target = 'http://' + url
+        target_cure = 'https://' + url
+        try:
+            rs = requests.get(url=target,headers=headers,timeout=5)
+            if rs.status_code == 200:
+                goodurl.append(target)
+            if rs.status_code == 301:
+                rr = requests.get(url=target_cure, headers=headers, timeout=5)
+                if rr.status_code == 200:
+                    goodurl.append(target_cure)
+        except:pass
+    for s in goodurl:
+        html = requests.session().get(url=s,headers=headers,timeout=5)
+        context = html.text
         status = html.status_code
-        title = re.search(r'<title>(.*?)</title>',comtext)
+        title = re.search(r'<title>(.*?)</title>',context)
         if title:
             title = title.group(1).strip().strip('\r').strip('\n')[:30]
         else:
             title = 'None'
-        banner = 'Not Found'
+        banner = 'None'
         try:
             banner = html.headers['server'][:20]
         except:pass
-        sys.stdout.write('%-26s %-26s %-26s %-26s\n' % (urls,status,title,banner))
+        sys.stdout.write('%-45s %-45s %-45s %-45s\n' % (url,status,title,banner))
+
+if __name__ == '__main__':
+    Test_01()
